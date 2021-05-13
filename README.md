@@ -1,2 +1,3 @@
 # papodebar-api
-An examplo of Node API with Strapi
+
+An example of Node API with Strapi
