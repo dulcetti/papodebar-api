@@ -1,0 +1,54 @@
+{
+  "kind": "collectionType",
+  "collectionName": "comments",
+  "info": {
+    "name": "Comment",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "author_email": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string",
+      "required": true
+    },
+    "author_ip": {
+      "type": "string"
+    },
+    "approved": {
+      "type": "boolean"
+    },
+    "comment_type": {
+      "type": "string"
+    },
+    "comment_date": {
+      "type": "datetime"
+    },
+    "body": {
+      "type": "richtext"
+    },
+    "parent": {
+      "model": "comment"
+    },
+    "children": {
+      "model": "comment"
+    },
+    "post": {
+      "model": "post"
+    },
+    "author_url": {
+      "type": "string"
+    },
+    "user": {
+      "plugin": "users-permissions",
+      "model": "user"
+    }
+  }
+}
