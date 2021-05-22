@@ -19,6 +19,22 @@ module.exports = {
       headers: headers,
     });
 
+    const verifyUserOfPost = (idAuthor) => {
+      const resultStrapiUsers = strapiUsers.data.data.results;
+      const userOfPost = resultStrapiUsers.find(
+        (strapiUser) => strapiUser.username === getUsernameWp(idAuthor)
+      );
+
+      return userOfPost.id;
+    };
+
+    const getUsernameWp = (idUser) => {
+      const { data } = usersWp;
+      const userOfWpPost = data.find((user) => user.id === idUser);
+
+      return userOfWpPost.slug;
+    };
+
     const posts = await Promise.all(
       data.map(
         (post) =>
