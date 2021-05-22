@@ -18,16 +18,13 @@
     "slug": {
       "type": "string"
     },
-    "excerpt": {
-      "type": "string"
-    },
     "content": {
       "type": "richtext"
     },
     "publish_date": {
       "type": "datetime"
     },
-    "feature_image": {
+    "featured_image": {
       "model": "file",
       "via": "related",
       "allowedTypes": [
@@ -36,9 +33,6 @@
       "plugin": "upload",
       "required": false,
       "pluginOptions": {}
-    },
-    "published": {
-      "type": "boolean"
     },
     "author": {
       "plugin": "admin",
