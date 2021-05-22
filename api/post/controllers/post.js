@@ -2,7 +2,22 @@ const axios = require('axios');
 
 module.exports = {
   import: async (ctx) => {
-    const { data } = await axios.get('https://www.papodebar.com/wp-json/wp/v2/posts/35180');
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization':
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjIxNjIzMjMwLCJleHAiOjE2MjQyMTUyMzB9.nU2b7uRnhhcrcKcD67xXXv-Hh_Fpv0fwijc9ZVHTTvE',
+    };
+    const { data } = await axios.get('https://www.papodebar.com/wp-json/wp/v2/posts?per_page=1');
+    const usersWp = await axios.get('https://www.papodebar.com/wp-json/wp/v2/users?per_page=100');
+    const categoriesWp = await axios.get(
+      'https://www.papodebar.com/wp-json/wp/v2/categories?per_page=100'
+    );
+    const strapiUsers = await axios.get('http://localhost:1337/admin/users', {
+      headers: headers,
+    });
+    const strapiCategories = await axios.get('http://localhost:1337/categories', {
+      headers: headers,
+    });
 
     const posts = await Promise.all(
       data.map(
