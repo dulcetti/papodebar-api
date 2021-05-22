@@ -27,7 +27,7 @@
     "publish_date": {
       "type": "datetime"
     },
-    "feature_image": {
+    "featured_image": {
       "model": "file",
       "via": "related",
       "allowedTypes": [
@@ -39,16 +39,9 @@
       "required": false,
       "pluginOptions": {}
     },
-    "published": {
-      "type": "boolean"
-    },
     "author": {
       "plugin": "admin",
       "model": "user"
-    },
-    "tags": {
-      "model": "category",
-      "collection": "tag"
     },
     "categories": {
       "model": "category",

@@ -2,7 +2,33 @@ const axios = require('axios');
 
 module.exports = {
   import: async (ctx) => {
-    const { data } = await axios.get('https://www.papodebar.com/wp-json/wp/v2/pages?per_page=1');
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization':
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjIxNjIzMjMwLCJleHAiOjE2MjQyMTUyMzB9.nU2b7uRnhhcrcKcD67xXXv-Hh_Fpv0fwijc9ZVHTTvE',
+    };
+    const { data } = await axios.get('https://www.papodebar.com/wp-json/wp/v2/pages?per_page=15');
+    const usersWp = await axios.get('https://www.papodebar.com/wp-json/wp/v2/users?per_page=100');
+    const strapiUsers = await axios.get('http://localhost:1337/admin/users', {
+      headers: headers,
+    });
+
+    const verifyUserOfPage = (idAuthor) => {
+      const resultStrapiUsers = strapiUsers.data.data.results;
+      const userOfPage = resultStrapiUsers.find(
+        (strapiUser) => strapiUser.username === getUsernameWp(idAuthor)
+      );
+
+      return userOfPage.id;
+    };
+
+    const getUsernameWp = (idUser) => {
+      const { data } = usersWp;
+      const userOfWpPage = data.find((user) => user.id === idUser);
+
+      return userOfWpPage.slug;
+    };
+
     const pages = await Promise.all(
       data.map(
         (page) =>
@@ -12,34 +38,31 @@ module.exports = {
               content: { rendered: contentRendered },
               date,
               date_gmt,
-              excerpt: { rendered: excerptRendered },
               featured_media_src_url,
               id,
               slug,
-              status,
               title: { rendered: titleRendered },
             } = page;
-            const dataAuthor = await axios.get(
-              `https://www.papodebar.com/wp-json/wp/v2/users/${author}`
-            );
 
             try {
-              const downloaded = await strapi.config.functions.download(featured_media_src_url);
-              const [{ id: fileId }] = await strapi.config.functions.upload(downloaded);
+              let fileFeaturedImage = null;
+
+              if (featured_media_src_url) {
+                const downloaded = await strapi.config.functions.download(featured_media_src_url);
+                const [{ id: fileId }] = await strapi.config.functions.upload(downloaded);
+                fileFeaturedImage = [fileId];
+              }
 
               const pageData = {
-                author: dataAuthor,
+                author: verifyUserOfPage(author),
                 content: contentRendered,
                 original_date: date,
                 publish_date: date_gmt,
-                excerpt: excerptRendered,
-                feature_image: [fileId],
-                published: status === 'publish',
+                featured_image: fileFeaturedImage,
                 wp_id: id,
                 slug,
                 title: titleRendered,
               };
-              console.info(pageData);
               const created = await strapi.services.page.create(pageData);
               resolve(created);
             } catch (err) {

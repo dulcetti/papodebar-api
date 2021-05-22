@@ -2,7 +2,55 @@ const axios = require('axios');
 
 module.exports = {
   import: async (ctx) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization':
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjIxNjIzMjMwLCJleHAiOjE2MjQyMTUyMzB9.nU2b7uRnhhcrcKcD67xXXv-Hh_Fpv0fwijc9ZVHTTvE',
+    };
     const { data } = await axios.get('https://www.papodebar.com/wp-json/wp/v2/posts?per_page=1');
+    const usersWp = await axios.get('https://www.papodebar.com/wp-json/wp/v2/users?per_page=100');
+    const categoriesWp = await axios.get(
+      'https://www.papodebar.com/wp-json/wp/v2/categories?per_page=100'
+    );
+    const strapiUsers = await axios.get('http://localhost:1337/admin/users', {
+      headers: headers,
+    });
+    const strapiCategories = await axios.get('http://localhost:1337/categories', {
+      headers: headers,
+    });
+
+    const verifyUserOfPost = (idAuthor) => {
+      const resultStrapiUsers = strapiUsers.data.data.results;
+      const userOfPost = resultStrapiUsers.find(
+        (strapiUser) => strapiUser.username === getUsernameWp(idAuthor)
+      );
+
+      return userOfPost.id;
+    };
+
+    const getUsernameWp = (idUser) => {
+      const { data } = usersWp;
+      const userOfWpPost = data.find((user) => user.id === idUser);
+
+      return userOfWpPost.slug;
+    };
+
+    const verifyCategoryOfPost = (category) => {
+      const resultStrapiCategories = strapiCategories.data;
+      const postCategory = resultStrapiCategories.find(
+        (strapiCategory) => strapiCategory.slug === getCategoryWp(category)
+      );
+
+      return postCategory.id;
+    };
+
+    const getCategoryWp = (idCategory) => {
+      const { data } = categoriesWp;
+      const categoryOfWpPost = data.find((category) => category.id === idCategory);
+
+      return categoryOfWpPost.slug;
+    };
+
     const posts = await Promise.all(
       data.map(
         (post) =>
@@ -17,34 +65,25 @@ module.exports = {
               featured_media_src_url,
               id,
               slug,
-              status,
               title: { rendered: titleRendered },
             } = post;
-            const dataAuthor = await axios.get(
-              `https://www.papodebar.com/wp-json/wp/v2/users/${author}`
-            );
-            const dataCategory = await axios.get(
-              `https://www.papodebar.com/wp-json/wp/v2/categories/${categories[0]}`
-            );
 
             try {
               const downloaded = await strapi.config.functions.download(featured_media_src_url);
               const [{ id: fileId }] = await strapi.config.functions.upload(downloaded);
 
               const postData = {
-                author: dataAuthor,
+                author: verifyUserOfPost(author),
                 content: contentRendered,
-                categories: dataCategory,
+                categories: verifyCategoryOfPost(categories[0]),
                 original_date: date,
                 publish_date: date_gmt,
                 excerpt: excerptRendered,
-                feature_image: [fileId],
-                published: status === 'publish',
+                featured_image: [fileId],
                 wp_id: id,
                 slug,
                 title: titleRendered,
               };
-              console.info(postData);
               const created = await strapi.services.post.create(postData);
               resolve(created);
             } catch (err) {
