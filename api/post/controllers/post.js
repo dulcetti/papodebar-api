@@ -35,6 +35,22 @@ module.exports = {
       return userOfWpPost.slug;
     };
 
+    const verifyCategoryOfPost = (category) => {
+      const resultStrapiCategories = strapiCategories.data;
+      const postCategory = resultStrapiCategories.find(
+        (strapiCategory) => strapiCategory.slug === getCategoryWp(category)
+      );
+
+      return postCategory.id;
+    };
+
+    const getCategoryWp = (idCategory) => {
+      const { data } = categoriesWp;
+      const categoryOfWpPost = data.find((category) => category.id === idCategory);
+
+      return categoryOfWpPost.slug;
+    };
+
     const posts = await Promise.all(
       data.map(
         (post) =>
