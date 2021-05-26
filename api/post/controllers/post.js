@@ -51,7 +51,8 @@ module.exports = {
     };
 
     let page = 1;
-    const perPage = 1;
+    const perPage = 100;
+    const allPosts = [];
 
     async function getPaginatedWpPosts() {
       const url = `https://www.papodebar.com/wp-json/wp/v2/posts?per_page=${perPage}&page=${page}`;
@@ -61,7 +62,7 @@ module.exports = {
           const { data } = result;
           console.info(data);
 
-          /*const posts = await Promise.all(
+          const posts = await Promise.all(
             data.map(
               (post) =>
                 new Promise(async (resolve, reject) => {
@@ -108,9 +109,13 @@ module.exports = {
                   }
                 })
             )
-          );*/
+          );
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
 
-    ctx.send(posts);
+    ctx.send(allPosts);
   },
 };
