@@ -110,6 +110,9 @@ module.exports = {
                 })
             )
           );
+          allPosts.push(posts);
+          page++;
+          getPaginatedWpPosts();
         })
         .catch((error) => {
           console.error(error);
