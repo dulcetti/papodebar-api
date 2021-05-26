@@ -60,7 +60,6 @@ module.exports = {
         .get(url)
         .then(async (result) => {
           const { data } = result;
-          console.info(data);
 
           const posts = await Promise.all(
             data.map(
